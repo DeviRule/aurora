@@ -52,10 +52,10 @@ RUN sudo apt-get install -y gcc-$(gcc --version|head -n1|sed 's/\..*//'|sed 's/.
 #RUN wget -q -c https://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz && tar xf afl-latest.tgz && mv afl-2.52b afl-fuzz
 #Get AFL++ 
 RUN git clone https://github.com/DeviRule/AFLplusplus
-cd AFLplusplus
+RUN cd AFLplusplus
 
 ##  apply patch & build
-cp $AURORA_GIT_DIR/crash_exploration/afl_aurora.patch .
+RUN cp $AURORA_GIT_DIR/crash_exploration/afl_aurora.patch .
 RUN patch -p1 < aurora_afl.patch && make all && sudo make install
 
 #################################################################
