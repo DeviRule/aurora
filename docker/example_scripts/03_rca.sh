@@ -10,7 +10,7 @@ cargo build --release --bin monitor
 cargo build --release --bin rca
 
 # run root cause analysis
-cargo run --release --bin rca -- --eval-dir $EVAL_DIR --trace-dir $EVAL_DIR --monitor --rank-predicates
+CHESS= 1 cargo run --release --bin rca -- --eval-dir $EVAL_DIR --trace-dir $EVAL_DIR --monitor --rank-predicates
 
 # (Optional) enrich with debug symbols
-cargo run --release --bin addr2line -- --eval-dir $EVAL_DIR
+CHESS=1 cargo run --release --bin addr2line -- --eval-dir $EVAL_DIR

@@ -11,15 +11,14 @@ ARG USER_GID=1000
 
 #Enable sudo group
 RUN echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-ADD entrypoint.sh "/usr/bin/"
 WORKDIR /tmp
 
-
-#Create user "user"
-RUN groupadd -g ${USER_GID} user
-RUN useradd -l --shell /bin/bash -c "" -m -u ${USER_UID} -g user -G sudo user
+RUN useradd -m -s /bin/bash user 
+#Enable sudo group
+RUN echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/user
 WORKDIR "/home/user"
 USER user
+
 
 RUN wget -O ~/.gdbinit-gef.py -q https://gef.blah.cat/sh \
   && echo source ~/.gdbinit-gef.py >> ~/.gdbinit
@@ -27,37 +26,50 @@ RUN wget -O ~/.gdbinit-gef.py -q https://gef.blah.cat/sh \
 
 #################################################################
 # Clone Aurora repository and prepare environment
-RUN git clone https://github.com/RUB-SysSec/aurora
+RUN mkdir aurora
+COPY --chmod=0777 .. /home/user/aurora
 
 RUN mkdir evaluation
 
 ENV AURORA_GIT_DIR=/home/user/aurora
 ENV EVAL_DIR=/home/user/evaluation
-ENV AFL_DIR=$EVAL_DIR/afl-fuzz
-ENV AFL_WORKDIR=$EVAL_DIR/afl-workdir
+ENV AFL_DIR=$EVAL_DIR/AFLplusplus
+ENV AFL_WORKDIR=$EVAL_DIR/afl-workdir/default
 
 WORKDIR $EVAL_DIR
 RUN mkdir -p $EVAL_DIR/inputs/crashes && mkdir -p $EVAL_DIR/inputs/non_crashes
 
 #################################################################
-# Install AFL
-RUN wget -q -c https://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz && tar xf afl-latest.tgz && mv afl-2.52b afl-fuzz
+# Modify it so that it install AFL++
+RUN sudo apt-get update
+RUN sudo apt-get install -y build-essential python3-dev automake cmake git flex bison libglib2.0-dev libpixman-1-dev python3-setuptools cargo libgtk-3-dev wget vim
+# try to install llvm 14 
+RUN wget https://apt.llvm.org/llvm.sh
+RUN sudo chmod +x llvm.sh
+RUN sudo ./llvm.sh 14 all
+RUN sudo apt-get install -y gcc-$(gcc --version|head -n1|sed 's/\..*//'|sed 's/.* //')-plugin-dev libstdc++-$(gcc --version|head -n1|sed 's/\..*//'|sed 's/.* //')-dev
+
+#RUN wget -q -c https://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz && tar xf afl-latest.tgz && mv afl-2.52b afl-fuzz
+#Get AFL++ 
+RUN git clone https://github.com/DeviRule/AFLplusplus
+cd AFLplusplus
 
 ##  apply patch & build
-RUN cd afl-fuzz && patch -p1 < ${AURORA_GIT_DIR}/crash_exploration/crash_exploration.patch && make -j
+cp $AURORA_GIT_DIR/crash_exploration/afl_aurora.patch .
+RUN patch -p1 < aurora_afl.patch && make all && sudo make install
 
 #################################################################
 # Build mruby target
-RUN git clone https://github.com/mruby/mruby.git && cd mruby && git checkout 88604e39ac9c25ffdad2e3f03be26516fe866038
-## build afl version
-RUN CC=$AFL_DIR/afl-gcc printenv | grep CC
-RUN cd mruby && CC=$AFL_DIR/afl-gcc make -e -j && mv ./bin/mruby ../mruby_fuzz
+# RUN git clone https://github.com/mruby/mruby.git && cd mruby && git checkout 88604e39ac9c25ffdad2e3f03be26516fe866038
+# ## build afl version
+# RUN CC=$AFL_DIR/afl-gcc printenv | grep CC
+# RUN cd mruby && CC=$AFL_DIR/afl-gcc make -e -j && mv ./bin/mruby ../mruby_fuzz
 
 # clean
-RUN cd mruby && make clean
+# RUN cd mruby && make clean
 
 # build normal version for tracing/rca
-RUN cd mruby && CFLAGS="-ggdb -O0" make -e -j && mv ./bin/mruby ../mruby_trace
+# RUN cd mruby && CFLAGS="-ggdb -O0" make -e -j && mv ./bin/mruby ../mruby_trace
 
 #################################################################
 # Install Rust
@@ -78,7 +90,7 @@ RUN cd ${PIN_ROOT}/source/tools/AuroraTracer && make obj-intel64/aurora_tracer.s
 
 #################################################################
 # Complete setting up evaluation directory
-RUN cp $AURORA_GIT_DIR/example.zip $EVAL_DIR && unzip -q example.zip && cp -r example/mruby_type_confusion/seed .
-RUN echo "@@" > arguments.txt
+# RUN cp $AURORA_GIT_DIR/example.zip $EVAL_DIR && unzip -q example.zip && cp -r example/mruby_type_confusion/seed .
+# RUN echo "@@" > arguments.txt
 
 WORKDIR /home/user

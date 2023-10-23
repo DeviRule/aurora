@@ -1,0 +1,78 @@
+diff --git a/include/afl-fuzz.h b/include/afl-fuzz.h
+index 217a720a..57537155 100644
+--- a/include/afl-fuzz.h
++++ b/include/afl-fuzz.h
+@@ -139,7 +139,7 @@ extern s8  interesting_8[INTERESTING_8_LEN];
+ extern s16 interesting_16[INTERESTING_8_LEN + INTERESTING_16_LEN];
+ extern s32
+     interesting_32[INTERESTING_8_LEN + INTERESTING_16_LEN + INTERESTING_32_LEN];
+-
++static u32 unique_non_crash_id = 0;
+ struct tainted {
+ 
+   u32             pos;
+diff --git a/src/afl-fuzz-bitmap.c b/src/afl-fuzz-bitmap.c
+index 0429db34..b8cc3685 100644
+--- a/src/afl-fuzz-bitmap.c
++++ b/src/afl-fuzz-bitmap.c
+@@ -844,7 +844,29 @@ save_if_interesting(afl_state_t *afl, void *mem, u32 len, u8 fault) {
+       FATAL("Unable to execute target application");
+ 
+     default:
+-      return keeping;
++
++    /* Save non-crash output */
++      if (!(new_bits = has_new_bits(afl, afl->virgin_bits))){
++        return keeping;
++      }
++      #ifndef SIMPLE_FILES
++            snprintf(fn, PATH_MAX, "%s/non_crashes/id:%06llu,sig:%02u,%s", afl->out_dir,
++               unique_non_crash_id, afl->fsrv.last_kill_signal,
++               describe_op(afl, 0, NAME_MAX - strlen("id:000000,sig:00,")));
++
++      #else
++
++            fn = alloc_printf("%s/non_crashes/id_%06u_%u", out_dir, queued_paths, unique_non_crash_id);
++            snprintf(fn, PATH_MAX, "%s/non_crashes/id_%06llu_%02u", afl->out_dir,
++               unique_non_crash_id, afl->fsrv.last_kill_signal);
++
++      #endif /* ^!SIMPLE_FILES */
++            fd = open(fn, O_WRONLY | O_CREAT | O_EXCL, 0600);
++            if (fd < 0) PFATAL("Unable to create '%s'", fn);
++            ck_write(fd, mem, len, fn);
++            close(fd);
++            unique_non_crash_id += 1;
++            return keeping;
+ 
+   }
+ 
+diff --git a/src/afl-fuzz-init.c b/src/afl-fuzz-init.c
+index 35932913..9b94a279 100644
+--- a/src/afl-fuzz-init.c
++++ b/src/afl-fuzz-init.c
+@@ -1918,6 +1918,12 @@ static void handle_existing_out_dir(afl_state_t *afl) {
+   if (delete_files(fn, CASE_PREFIX)) { goto dir_cleanup_failed; }
+   ck_free(fn);
+ 
++
++/* Delete non-crash output */
++  fn = alloc_printf("%s/non_crashes", afl->out_dir);
++  if (delete_files(fn, CASE_PREFIX)) {goto dir_cleanup_failed; }
++  ck_free(fn);
++
+   fn = alloc_printf("%s/hangs", afl->out_dir);
+ 
+   /* Backup hangs, too. */
+@@ -2182,6 +2188,12 @@ void setup_dirs_fds(afl_state_t *afl) {
+   if (mkdir(tmp, 0700)) { PFATAL("Unable to create '%s'", tmp); }
+   ck_free(tmp);
+ 
++  /* All non-crash output */
++
++  tmp = alloc_printf("%s/non_crashes", afl->out_dir);
++  if (mkdir(tmp, 0700)) {PFATAL("Unable to create '%s'", tmp); }
++  ck_free(tmp);
++
+   /* All recorded hangs. */
+ 
+   tmp = alloc_printf("%s/hangs", afl->out_dir);

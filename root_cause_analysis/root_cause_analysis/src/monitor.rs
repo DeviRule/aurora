@@ -34,9 +34,8 @@ pub fn monitor(
     let timeout = format!("{}", config.monitor_timeout);
 
     let args: Vec<_> = cmd_line.split_whitespace().map(|s| s.to_string()).collect();
-
     let mut child = if let Some(p) = file_path {
-        Command::new("./target/release/monitor")
+        Command::new("CHESS=1 ./target/release/monitor")
             .arg(&predicate_order_file)
             .arg(&predicate_file)
             .arg(&timeout)
@@ -47,7 +46,7 @@ pub fn monitor(
             .spawn()
             .expect("Could not spawn child")
     } else {
-        Command::new("./target/release/monitor")
+        Command::new("CHESS=1 ./target/release/monitor")
             .arg(&predicate_order_file)
             .arg(&predicate_file)
             .arg(&timeout)
