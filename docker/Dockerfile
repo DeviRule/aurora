@@ -92,4 +92,7 @@ RUN cd ${PIN_ROOT}/source/tools/AuroraTracer && make obj-intel64/aurora_tracer.s
 # RUN cp $AURORA_GIT_DIR/example.zip $EVAL_DIR && unzip -q example.zip && cp -r example/mruby_type_confusion/seed .
 # RUN echo "@@" > arguments.txt
 
+#################################################################
+# link clang++14 to clang++ 
+RUN /usr/bin && sudo ln -s clang++-14 clang++
 WORKDIR /home/user
