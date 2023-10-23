@@ -55,7 +55,7 @@ RUN git clone https://github.com/DeviRule/AFLplusplus
 RUN cd AFLplusplus
 
 ##  apply patch & build
-RUN cp $AURORA_GIT_DIR/crash_exploration/afl_aurora.patch .
+RUN cp $AURORA_GIT_DIR/crash_exploration/aurora_afl.patch .
 RUN patch -p1 < aurora_afl.patch && make all && sudo make install
 
 #################################################################
