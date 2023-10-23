@@ -12,10 +12,19 @@ if [ ! -f "$EVAL_DIR/pin-3.15-98253-gb56e429b1-gcc-linux/source/tools/AuroraTrac
     exit 1
 fi
 
+# Check if an argument was provided
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <TRACE_TARGET_PATH>"
+    exit 1
+fi
+
+$TRACE_TARGET=$1
+
+
 mkdir -p $EVAL_DIR/traces
 # requires at least python 3.6
 pushd $AURORA_GIT_DIR/tracing/scripts > /dev/null
-python3 tracing.py $EVAL_DIR/mruby_trace $EVAL_DIR/inputs $EVAL_DIR/traces
+python3 tracing.py $EVAL_DIR/$TRACE_TARGET $EVAL_DIR/inputs $EVAL_DIR/traces
 # extract stack and heap addr ranges from logfiles
 python3 addr_ranges.py --eval_dir $EVAL_DIR $EVAL_DIR/traces
 popd > /dev/null
