@@ -42,7 +42,7 @@ RUN mkdir -p $EVAL_DIR/inputs/crashes && mkdir -p $EVAL_DIR/inputs/non_crashes
 #################################################################
 # Modify it so that it install AFL++
 RUN sudo apt-get update
-RUN sudo apt-get install -y build-essential python3-dev automake cmake git flex bison libglib2.0-dev libpixman-1-dev python3-setuptools cargo libgtk-3-dev wget vim
+RUN sudo apt-get install -y build-essential python3-dev automake cmake git flex bison libglib2.0-dev libpixman-1-dev python3-setuptools cargo libgtk-3-dev wget vim lsb-release software-properties-common gnupg
 # try to install llvm 14 
 RUN wget https://apt.llvm.org/llvm.sh
 RUN sudo chmod +x llvm.sh
