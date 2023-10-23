@@ -29,11 +29,15 @@ def build_fuzz():
     
 
 def build_trace():
+    base_path = Path(SOURCE_INPUT_PATH)
+    full_path = base_path / "challenge_src"
+    os.chdir(full_path)
     subprocess.run(["make","clean"])
     # Copy the current environment variables and modify CC
     env = os.environ.copy()
     env["CC"] = "clang++"
     result = subprocess.run(['make'], env=env)
+    base_path = Path(SOURCE_INPUT_PATH)
     source_file = base_path / "challeng_src" / "build" / "garfield.bin"
     destination_directory = Path(EVALUATION_PATH)
     shutil.move(source_file, destination_directory + FUZZ_TARGET)
