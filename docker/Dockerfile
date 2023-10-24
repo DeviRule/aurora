@@ -38,6 +38,7 @@ ENV AFL_WORKDIR=$EVAL_DIR/afl-workdir
 
 WORKDIR $EVAL_DIR
 RUN mkdir -p $EVAL_DIR/inputs/crashes && mkdir -p $EVAL_DIR/inputs/non_crashes
+RUN mkdir -p $EVAL_DIR/seed
 
 #################################################################
 # Modify it so that it install AFL++
