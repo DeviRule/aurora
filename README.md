@@ -86,21 +86,11 @@ echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
 Build and install `AFL`:
 
 ```
-# download afl
-wget -c https://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz
-tar xvf afl-latest.tgz
+# download afl++
+RUN git clone https://github.com/DeviRule/AFLplusplus
 
-# rename afl directory and cd
-mv afl-2.52b afl-fuzz
-cd afl-fuzz
-
-# apply patch
-patch -p1 < ${AURORA_GIT_DIR}/crash_exploration/crash_exploration.patch
-
-# build afl
-make -j
-cd ..
-```
+##  apply patch & build
+RUN cd AFLplusplus/ && patch -p1 <  ${AURORA_GIT_DIR}/crash_exploration/aurora_afl.patch && make all && sudo make install
 
 Buld the `mruby` target:
 
@@ -111,7 +101,7 @@ cd mruby
 git checkout 88604e39ac9c25ffdad2e3f03be26516fe866038
 
 # build afl version
-CC=$AFL_DIR/afl-gcc make -e -j
+CC=afl-g++ make -e -j
 mv ./bin/mruby ../mruby_fuzz
 
 # clean
@@ -221,13 +211,14 @@ Then, build (or [pull from Dockerhub](https://hub.docker.com/repository/docker/m
 # either pull the image from dockerhub
 ./pull.sh
 # *or*, alternatively, manually build it
+cd aurora/
 ./build.sh
 
 # start container
 ./run.sh
 ```
 
-In docker, you can find the following scripts in `/home/user/aurora/docker/example_scripts`
+In docker, you can find the following scripts in `/home/user/aurora/docker/`
 ```
 # Run AFL in crash exploration mode (modify timeout before)
 ./01_afl.sh
