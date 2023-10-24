@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 set -eu
 
@@ -18,7 +18,7 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-$TRACE_TARGET=$1
+TRACE_TARGET=$1
 
 
 mkdir -p $EVAL_DIR/traces

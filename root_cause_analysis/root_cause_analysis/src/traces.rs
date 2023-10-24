@@ -21,7 +21,7 @@ pub fn analyze_traces(config: &Config) {
     println!("dumping linear scores");
     trace_analyzer.dump_scores(&trace_analysis_config, false, false);
 
-    let predicates = trace_analyzer.get_predicates_better_than(0.9);
+    let predicates = trace_analyzer.get_predicates_better_than(0.0);
 
     serialize_mnemonics(config, &predicates, &trace_analyzer);
 

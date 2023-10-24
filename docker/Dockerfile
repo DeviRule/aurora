@@ -34,7 +34,7 @@ RUN mkdir evaluation
 ENV AURORA_GIT_DIR=/home/user/aurora
 ENV EVAL_DIR=/home/user/evaluation
 ENV AFL_DIR=$EVAL_DIR/AFLplusplus
-ENV AFL_WORKDIR=$EVAL_DIR/afl-workdir/default
+ENV AFL_WORKDIR=$EVAL_DIR/afl-workdir
 
 WORKDIR $EVAL_DIR
 RUN mkdir -p $EVAL_DIR/inputs/crashes && mkdir -p $EVAL_DIR/inputs/non_crashes
@@ -52,6 +52,7 @@ RUN sudo apt-get install -y gcc-$(gcc --version|head -n1|sed 's/\..*//'|sed 's/.
 #RUN wget -q -c https://lcamtuf.coredump.cx/afl/releases/afl-latest.tgz && tar xf afl-latest.tgz && mv afl-2.52b afl-fuzz
 #Get AFL++ 
 WORKDIR $EVAL_DIR
+RUN touch arguments.txt
 RUN git clone https://github.com/DeviRule/AFLplusplus
 
 ##  apply patch & build
@@ -95,4 +96,5 @@ RUN cd ${PIN_ROOT}/source/tools/AuroraTracer && make obj-intel64/aurora_tracer.s
 #################################################################
 # link clang++14 to clang++ 
 RUN /usr/bin && sudo ln -s clang++-14 clang++
+
 WORKDIR /home/user

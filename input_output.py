@@ -12,7 +12,7 @@ HOME_PATH = "/home/user"
 EVALUATION_PATH = f"{HOME_PATH}/evaluation"
 FUZZ_TARGET = f"{PROJECT_NAME}_fuzz"
 TRACE_TARGET = f"{PROJECT_NAME}_trace"
-FUZZ_TIMEOUT = "60"
+FUZZ_TIMEOUT = "5"
 
 def build_fuzz():
     base_path = Path(SOURCE_INPUT_PATH)
@@ -56,16 +56,28 @@ def build_trace():
     
 
 def run_fuzz():
-    return_code = subprocess.call(['$AURORA_GIT_DIR/docker/01_afl.sh', FUZZ_TIMEOUT , f'{EVALUATION_PATH}/{FUZZ_TARGET}'])
+    env = os.environ.copy()
+    print(env)
+    # for chess target 
+    env["CHESS"] = "1"
+    return_code = subprocess.run([f'{env["AURORA_GIT_DIR"]}/docker/01_afl.sh', FUZZ_TIMEOUT , f'{FUZZ_TARGET}'],env=env)
 
 def run_trace():
-    return_code = subprocess.call(['$AURORA_GIT_DIR/docker/02_tracing.sh',f'{EVALUATION_PATH}/{TRACE_TARGET}'])
+    env = os.environ.copy()
+    # for chess target 
+    env["CHESS"] = "1"
+    return_code = subprocess.run([f'{env["AURORA_GIT_DIR"]}/docker/02_tracing.sh', TRACE_TARGET],env=env)
 
 def run_rca():
-    return_code = subprocess.call(['$AURORA_GIT_DIR/docker/03_rca.sh'])
+    env = os.environ.copy()
+    # for chess target 
+    env["CHESS"] = "1"
+    return_code = subprocess.run([f'{env["AURORA_GIT_DIR"]}/docker/03_rca.sh'],env=env)
 
 if __name__ == "__main__":
 
     build_fuzz()
     build_trace()
-
+    run_fuzz()
+    run_trace()
+    run_rca()
