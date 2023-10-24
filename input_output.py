@@ -12,7 +12,7 @@ HOME_PATH = "/home/user"
 EVALUATION_PATH = f"{HOME_PATH}/evaluation"
 FUZZ_TARGET = f"{PROJECT_NAME}_fuzz"
 TRACE_TARGET = f"{PROJECT_NAME}_trace"
-FUZZ_TIMEOUT = "5"
+FUZZ_TIMEOUT = "20000"
 
 def build_fuzz():
     base_path = Path(SOURCE_INPUT_PATH)

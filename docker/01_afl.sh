@@ -11,7 +11,7 @@ TIMEOUT=$1
 FUZZ_TARGAT=$2
 
 # run AFL
-export CHESS=1 && timeout $TIMEOUT afl-fuzz -C -d -m none -i $EVAL_DIR/seed -o $AFL_WORKDIR -- $EVAL_DIR/$FUZZ_TARGAT 
+export CHESS=1 && timeout $TIMEOUT afl-fuzz -C -i $EVAL_DIR/seed -o $AFL_WORKDIR -- $EVAL_DIR/$FUZZ_TARGAT 
 
 # save crashes and non-crashes
 cp $AFL_WORKDIR/default/queue/* $EVAL_DIR/inputs/crashes
