@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update -y && \
-    apt install -y build-essential git sudo python3 wget curl neovim htop \
+    apt install -y build-essential git sudo python3 wget curl neovim htop \c
 	ruby bison cmake
 
 ARG USER_UID=1000
@@ -95,6 +95,6 @@ RUN cd ${PIN_ROOT}/source/tools/AuroraTracer && make obj-intel64/aurora_tracer.s
 
 #################################################################
 # link clang++14 to clang++ 
-RUN /usr/bin && sudo ln -s clang++-14 clang++
+RUN cd /usr/bin && sudo ln -s clang++-14 clang++
 
 WORKDIR /home/user
